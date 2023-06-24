@@ -1,7 +1,7 @@
 import { flip, includes } from 'ramda'
 import { IRow } from "./data"
 import { FilterComponents } from "./filtering/Filters"
-import { FilterOperations } from "./filtering/useFilter"
+import { FilterOperations } from './filtering/operations'
 
 export type ColumnDef<T> = {
   filter?: (pred: any) => boolean, 
@@ -33,7 +33,7 @@ export const columnDefinitions: ColumnDef<IRow>[] = [
       locked: false,
       id: 'car',
       active: 'eqMultiCaseInsensitive',
-      value: ['bmw', 'audi'],
+      value: ['BMW', 'Audi'],
       filter: (val) => {
         const lower = val.toLowerCase()
         return flip(includes)(['bmw', 'audi'])(lower)

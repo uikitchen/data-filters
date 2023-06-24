@@ -3,6 +3,7 @@ import type { Filter } from "../Filters"
 type Props = Parameters<Filter["String"]["Filter"]>[0] & {type: 'text' | 'number'}
 
 export const InputBase = ({onChange, locked, value, trigger = 'onChange', type, commit}: Props) => {
+  
   const _handleOnChange = (value: any) => {
     onChange(value)
   }
@@ -22,7 +23,7 @@ export const InputBase = ({onChange, locked, value, trigger = 'onChange', type, 
       type={type}
       value={value ?? ""} 
       onChange={event => _handleOnChange(event.target.value)}
-      onBlur={trigger === 'blur' || trigger !== 'global' ? _handleBlur : undefined}
+      onBlur={trigger === 'blur' || (trigger !== 'global' && trigger !== 'submit') ? _handleBlur : undefined}
       onKeyDown={trigger === 'submit' || trigger !== 'global' ? handleKeyDown : undefined}
       disabled={locked}
     />

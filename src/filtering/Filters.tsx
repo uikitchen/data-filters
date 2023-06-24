@@ -1,7 +1,7 @@
 import { FilterType } from "./FilterType";
 import { InputNumber } from "./components/input-number";
 import { InputText } from "./components/input-text";
-import { FilterOperations } from "./useFilter";
+import { FilterOperations } from "./operations";
 
 export type Filter = Record<'String' | 'Date' | 'Select' | 'MultiSelect' | 'Number' | 'Switch', {
   type: 'string' | 'date' | 'select' | 'multiselect' | 'number' | 'switch',
@@ -28,6 +28,7 @@ export const FilterComponents: Filter = {
           active={active}
           options={[
             ['Contains', 'includes'], 
+            ['Contains (case ins.)', 'includesCaseInsensitive'], 
             ['Starts with', 'startsWith'], 
             ['Ends with', 'endsWith'],
             ['Not equals', 'notEquals'],

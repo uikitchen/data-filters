@@ -1,5 +1,5 @@
 import { FC } from "react"
-import { FilterOperations } from "./useFilter"
+import { FilterOperations } from "./operations"
 
 type Props = {
   options: [string, keyof typeof FilterOperations][], 

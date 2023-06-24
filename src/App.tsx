@@ -8,14 +8,20 @@ export const App: FC<{columnDefinitions: ColumnDef<IRow>[], data: any[]}> = ({co
   const {
     columns,
     filtered,
+    found,
     setFilter,
     clearFilter,
     clearAll,
     stageFilter,
     commitFilters,
     setMode,
-    options
-  } = useFilter(columnDefinitions, data);
+    options,
+    paging: {
+      Prev,
+      Next,
+      currentPage
+    }
+  } = useFilter(columnDefinitions, data, 10);
 
   return (
     <table>
@@ -61,7 +67,7 @@ export const App: FC<{columnDefinitions: ColumnDef<IRow>[], data: any[]}> = ({co
           }
         </tr>
         <tr>
-          <th>{filtered.length} records found</th>
+          <th>{found} records found</th>
           <th><button onClick={clearAll}>clear</button></th>
           <th><button onClick={commitFilters}>apply filter</button></th>
         </tr>
@@ -73,6 +79,15 @@ export const App: FC<{columnDefinitions: ColumnDef<IRow>[], data: any[]}> = ({co
           )
         })}
       </tbody>
+      <tfoot>
+        <tr>
+          <th>
+            <Prev />
+            <Next />
+          </th>
+          <th>{currentPage}</th>
+        </tr>
+      </tfoot>
     </table>
   )
 }
