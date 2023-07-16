@@ -3,8 +3,10 @@ import { InputNumber } from "./components/input-number";
 import { InputText } from "./components/input-text";
 import { FilterOperations } from "./operations";
 
-export type Filter = Record<'String' | 'Date' | 'Select' | 'MultiSelect' | 'Number' | 'Switch', {
-  type: 'string' | 'date' | 'select' | 'multiselect' | 'number' | 'switch',
+export type FilterTypes = 'String' | 'Date' | 'Select' | 'MultiSelect' | 'Number' | 'Switch';
+
+export type Filter = Record<FilterTypes, {
+  type: FilterTypes,
   Filter: (props: {
     onChange: any, 
     locked?: boolean, 
@@ -18,7 +20,7 @@ export type Filter = Record<'String' | 'Date' | 'Select' | 'MultiSelect' | 'Numb
 
 export const FilterComponents: Filter = {
   String: {
-    type: 'string',
+    type: 'String',
     Filter: InputText,
     Mode: function ({onChange, locked, active}) {
       return (
@@ -39,7 +41,7 @@ export const FilterComponents: Filter = {
     }
   },
   Date: {
-    type: 'date',
+    type: 'Date',
     Filter: function ({onChange, locked, value}) {
       return (
         <input
@@ -65,7 +67,7 @@ export const FilterComponents: Filter = {
     }
   },
   Select: {
-    type: 'select',
+    type: 'Select',
     Filter: function ({onChange, locked, value, options}) {
       return (
         <select 
@@ -93,7 +95,7 @@ export const FilterComponents: Filter = {
     }
   },
   MultiSelect: {
-    type: 'multiselect',
+    type: 'MultiSelect',
     Filter: function ({onChange, locked, value, options}) {
       return (
         <select 
@@ -123,7 +125,7 @@ export const FilterComponents: Filter = {
     }
   },
   Number: {
-    type: 'number',
+    type: 'Number',
     Filter: InputNumber,
     Mode: function ({onChange, locked, active}) {
       return (
@@ -141,7 +143,7 @@ export const FilterComponents: Filter = {
     }
   },
   Switch: {
-    type: 'switch',
+    type: 'Switch',
     Filter: function ({onChange, locked, value}) {
       return (
         <input 

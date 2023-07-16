@@ -1,7 +1,7 @@
-import { flip, includes } from 'ramda'
+import { divide, flip, includes } from 'ramda'
 import { IRow } from "./data"
-import { FilterComponents } from "./filtering/Filters"
-import { FilterOperations } from './filtering/operations'
+import { Filter, FilterComponents } from "../filtering/Filters"
+import { FilterOperations } from '../filtering/operations'
 
 export type ColumnDef<T> = {
   filter?: (pred: any) => boolean, 
@@ -9,8 +9,9 @@ export type ColumnDef<T> = {
   locked?: boolean, 
   id: keyof T, 
   active: keyof typeof FilterOperations, 
-  components: typeof FilterComponents[keyof typeof FilterComponents],
-  trigger?: 'blur' | 'submit' | 'onChange'
+  components?: typeof FilterComponents[keyof typeof FilterComponents],
+  trigger?: 'blur' | 'submit' | 'onChange',
+  type: Filter["String"]["type"]
 }
 
 export const columnDefinitions: ColumnDef<IRow>[] = [
@@ -20,14 +21,14 @@ export const columnDefinitions: ColumnDef<IRow>[] = [
       id: 'name',
       locked: false,
       active: 'includes',
-      components: FilterComponents.String,
-      trigger: 'submit'
+      trigger: 'submit',
+      type: 'String'
   },
   {
       locked: false,
       id: 'born',
       active: 'on',
-      components: FilterComponents.Date
+      type: 'Date'
   },
   {
       locked: false,
@@ -38,18 +39,18 @@ export const columnDefinitions: ColumnDef<IRow>[] = [
         const lower = val.toLowerCase()
         return flip(includes)(['bmw', 'audi'])(lower)
       },
-      components: FilterComponents.MultiSelect
+      type: 'MultiSelect',
   },
   {
       locked: false,
       id: 'height',
       active: 'eqLoose',
-      components: FilterComponents.Number
+      type: 'Number'
   },
   {
       locked: false,
       id: 'online',
       active: 'eq',
-      components: FilterComponents.Switch
+      type: 'Switch'
   },
 ]

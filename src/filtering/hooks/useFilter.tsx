@@ -1,8 +1,11 @@
 import { always, drop, filter, flip, fromPairs, map, multiply, pair, take, where } from 'ramda'
 import { useMemo, useState } from 'react'
-import { ColumnDef } from '../columns'
-import { filterMap } from '../utils'
-import { FilterOperations } from './operations'
+import { ColumnDef } from '../../data/columns'
+import { filterMap } from '../../utils'
+import { FilterOperations } from '../operations'
+import { FilterTypes, FilterComponents } from '../Filters'
+import React from 'react'
+import { useSelectData } from '../../hooks/useSelectData'
 // const instance = new ComlinkWorker<typeof import('../worker')>(new URL('../worker', import.meta.url), {type: 'module'})
 
 // interface WorkerMessage {
@@ -10,25 +13,28 @@ import { FilterOperations } from './operations'
 //   payload: number | string;
 // }
 
+const TypeMapping: Record<FilterTypes, typeof FilterComponents[keyof typeof FilterComponents]> = {
+  String: FilterComponents.String,
+  Date: FilterComponents.Date,
+  MultiSelect: FilterComponents.MultiSelect,
+  Number: FilterComponents.Number,
+  Select: FilterComponents.Select,
+  Switch: FilterComponents.Switch
+}
+
+export type WithComponent<T> = ColumnDef<T> & {
+  components: Required<typeof FilterComponents[keyof typeof FilterComponents]>;
+};
+
 export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pageSizeInit?: number) => {
-  const [columns, setColumns] = useState(columnDefinitions);
+  const [columns, setColumns] = useState<WithComponent<T>[]>(() => {
+    return columnDefinitions.map(cd => ({
+      ...cd, 
+      components: cd.components ? cd.components : TypeMapping[cd.type]
+    })) as WithComponent<T>[]
+  });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(pageSizeInit ?? data.length);
-  const [options] = useState<{[key: string]: Set<string>}>(() => {
-    const selectColumns = filterMap<ColumnDef<T>, string>(
-      e => e.components.type === 'select' || e.components.type === 'multiselect',
-      e => e.id,
-      columnDefinitions
-    )
-
-    if (!selectColumns.length)
-      return {};
-
-    return data.reduce((a, c) => {
-      selectColumns.forEach(e => a[e].add(c[e]))
-      return a;
-    }, fromPairs(map<any, any>(flip(pair)(new Set), selectColumns)))
-  });
   const [activeFilters, setActiveFilters] = useState(() => {
     return columnDefinitions.reduce((a, c) => {
       a[c.id] = c?.filter ?? always(true);
@@ -36,10 +42,11 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
     }, {} as Record<keyof T, typeof FilterOperations[keyof typeof FilterOperations]>)
   });
   const [filterStage, setFilterStage] = useState({});
+  const { options } = useSelectData(columns, data);
 
   const resetPage = () => setPage(1);
 
-  const setFilter = async (name: string, value: any, active: keyof typeof FilterOperations) => {
+  const setFilter = async (name: keyof T, value: any, active: keyof typeof FilterOperations) => {
     const t0 = performance.now();
     const res = _prepareFilters(name, value, active);
     // const result = await instance.add(2, 3)
@@ -55,7 +62,7 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
     console.log(`Call to doSomething took ${t1 - t0} milliseconds.`);
   }
 
-  const stageFilter = (name: string, value: any, active: keyof typeof FilterOperations) => {
+  const stageFilter = (name: keyof T, value: any, active: keyof typeof FilterOperations) => {
     const res = _prepareFilters(name, value, active);
 
     if (res)    
@@ -66,7 +73,7 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
       }))
   }
 
-  const stageMode = (name: string, values: (keyof typeof FilterOperations)[]) => {
+  const stageMode = (name: keyof T, values: (keyof typeof FilterOperations)[]) => {
     const res = _prepareModeFilters(name, values);
 
     if (res)
@@ -76,7 +83,7 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
       }))
   }
 
-  const setMode = (name: string, values: (keyof typeof FilterOperations)[]) => {
+  const setMode = (name: keyof T, values: (keyof typeof FilterOperations)[]) => {
     const res = _prepareModeFilters(name, values);
 
     if (res)
@@ -86,7 +93,7 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
       }))
   }
 
-  const clearFilter = (name: string) => {
+  const clearFilter = (name: keyof T) => {
     _resetFilter(name);
 
     if (pageSizeInit)
@@ -112,7 +119,7 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
     setFilterStage({});
   }
 
-  const _resetFilter = (name: string) => {
+  const _resetFilter = (name: keyof T) => {
     setActiveFilters((prevFilters: any) => ({
       ...prevFilters,
       [name]: always(true)
@@ -120,7 +127,7 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
     setColumns(columns.map(e => e.id === name ? ({...e, value: ""}): {...e}))
   }
 
-  const _prepareModeFilters = (name: string, values: (keyof typeof FilterOperations)[]) => {
+  const _prepareModeFilters = (name: keyof T, values: (keyof typeof FilterOperations)[]) => {
     const column = columns.filter(e => e.id === name);
     if (!column.length)
       return;
@@ -133,7 +140,7 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
     return {filter, value}
   }
 
-  const _prepareFilters = (name: string, value: any, active: keyof typeof FilterOperations) => {
+  const _prepareFilters = (name: keyof T, value: any, active: keyof typeof FilterOperations) => {
     setColumns(columns.map(e => e.id === name ? ({...e, value}): {...e}))
 
     if (pageSizeInit)
@@ -156,10 +163,7 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
   const goToPage = (page: number) => setPage(page);
 
   const prevDisabled = page === 1;
-  const nextDisabled = (filtered.number / pageSize) < page + 1 || filtered.number <= pageSize;
-
-  const prevButton = useMemo(() => (props: any) => <button onClick={prevPage} disabled={prevDisabled} {...props}>prev</button>, [prevDisabled])
-  const nextButton = useMemo(() => (props: any) => <button onClick={nextPage} disabled={nextDisabled} {...props}>next</button>, [nextDisabled])
+  const nextDisabled = (filtered.number / pageSize) < page || filtered.number <= pageSize;
 
   return {
     filtered: filtered.paged,
@@ -174,8 +178,10 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
     clearAll,
     options,
     paging: {
-      Prev: prevButton,
-      Next: nextButton,
+      prevPage,
+      nextPage,
+      prevDisabled,
+      nextDisabled,
       goToPage,
       currentPage: page
     }
