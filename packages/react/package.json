@@ -1,6 +1,6 @@
 {
   "name": "@uikitchen/react-data-hooks",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "main": "./dist/react-data-hooks.umd.cjs",
   "module": "./dist/react-data-hooks.js",
