@@ -9,7 +9,7 @@ export interface IRow {
   online: boolean
 }
 
-export const data = (): IRow[] => Array(1000).fill(null).map(e => ({
+export const data = (): IRow[] => Array(1000).fill(null).map(_ => ({
   name: faker.person.fullName(),
   born: faker.date.birthdate(),
   car: faker.vehicle.manufacturer(),

@@ -1,7 +1,7 @@
-import { divide, flip, includes } from 'ramda'
-import { IRow } from "./data"
+import { flip, includes } from 'ramda'
 import { Filter, FilterComponents } from "../filtering/Filters"
 import { FilterOperations } from '../filtering/operations'
+import { IRow } from "./data"
 
 export type ColumnDef<T> = {
   filter?: (pred: any) => boolean, 

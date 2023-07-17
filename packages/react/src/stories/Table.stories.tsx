@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Table } from './Table';
 import { columnDefinitions } from '../data/columns';
-import { data, getData } from '../data/data';
+import { getData } from '../data/data';
 
 const meta = {
   title: 'Table/Filtering',

@@ -1,17 +1,9 @@
-import { always, drop, filter, flip, fromPairs, map, multiply, pair, take, where } from 'ramda'
+import { always, drop, filter, multiply, take, where } from 'ramda'
 import { useMemo, useState } from 'react'
 import { ColumnDef } from '../../data/columns'
-import { filterMap } from '../../utils'
-import { FilterOperations } from '../operations'
-import { FilterTypes, FilterComponents } from '../Filters'
-import React from 'react'
 import { useSelectData } from '../../hooks/useSelectData'
-// const instance = new ComlinkWorker<typeof import('../worker')>(new URL('../worker', import.meta.url), {type: 'module'})
-
-// interface WorkerMessage {
-//   type: "result" | "error";
-//   payload: number | string;
-// }
+import { FilterComponents, FilterTypes } from '../Filters'
+import { FilterOperations } from '../operations'
 
 const TypeMapping: Record<FilterTypes, typeof FilterComponents[keyof typeof FilterComponents]> = {
   String: FilterComponents.String,
@@ -47,10 +39,7 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
   const resetPage = () => setPage(1);
 
   const setFilter = async (name: keyof T, value: any, active: keyof typeof FilterOperations) => {
-    const t0 = performance.now();
     const res = _prepareFilters(name, value, active);
-    // const result = await instance.add(2, 3)
-    // console.log(result)
     if (res) {
       setActiveFilters((prevFilters) => ({
         ...prevFilters,
@@ -58,8 +47,6 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
         [name]: res.filter(value)
       }));
     }
-    const t1 = performance.now();
-    console.log(`Call to doSomething took ${t1 - t0} milliseconds.`);
   }
 
   const stageFilter = (name: keyof T, value: any, active: keyof typeof FilterOperations) => {
@@ -183,7 +170,8 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
       prevDisabled,
       nextDisabled,
       goToPage,
-      currentPage: page
+      currentPage: page,
+      setPageSize
     }
   }
 }

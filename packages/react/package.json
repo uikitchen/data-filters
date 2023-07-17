@@ -1,6 +1,6 @@
 {
-  "name": "data-filters",
-  "version": "0.0.0",
+  "name": "@uikitchen/react-data-hooks",
+  "version": "0.1.0",
   "type": "module",
   "main": "./dist/data-filters.umd.cjs",
   "module": "./dist/data-filters.js",
