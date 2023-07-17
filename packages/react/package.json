@@ -2,13 +2,13 @@
   "name": "@uikitchen/react-data-hooks",
   "version": "0.1.0",
   "type": "module",
-  "main": "./dist/data-filters.umd.cjs",
-  "module": "./dist/data-filters.js",
+  "main": "./dist/react-data-hooks.umd.cjs",
+  "module": "./dist/react-data-hooks.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/data-filters.js",
-      "require": "./dist/data-filters.umd.cjs"
+      "import": "./dist/react-data-hooks.js",
+      "require": "./dist/react-data-hooks.umd.cjs"
     }
   },
   "scripts": {
