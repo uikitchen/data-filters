@@ -1,12 +1,12 @@
 {
   "name": "@uikitchen/react-data-hooks",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "main": "./dist/react-data-hooks.umd.cjs",
   "module": "./dist/react-data-hooks.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/react-data-hooks.js",
       "require": "./dist/react-data-hooks.umd.cjs"
     }
