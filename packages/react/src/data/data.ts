@@ -5,6 +5,7 @@ export interface IRow {
   name: string,
   born: Date | string,
   car: string,
+  city: string,
   height: number | string,
   online: boolean
 }
@@ -13,6 +14,7 @@ export const data = (): IRow[] => Array(1000).fill(null).map(_ => ({
   name: faker.person.fullName(),
   born: faker.date.birthdate(),
   car: faker.vehicle.manufacturer(),
+  city: faker.location.city(),
   height: faker.number.int({min: 150, max: 200}),
   online: faker.datatype.boolean()
 }))

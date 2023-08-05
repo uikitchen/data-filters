@@ -1,11 +1,13 @@
 import { includes, complement, equals, startsWith, endsWith, curry, flip, lte, gte, toLower, map } from "ramda";
 import { compareDate } from "../utils";
 
-export const FilterOperations: Record<string, any> = {
+export type Pred = ReturnType<typeof curry>;
+
+export const FilterOperations: Record<string, Pred> = {
   includes,
   includesCaseInsensitive: curry((input: string, value: string) => includes(toLower(input), toLower(value))),
-  notContains: complement(includes),
-  notEquals: complement(equals),
+  notContains: complement(includes) as Pred,
+  notEquals: complement(equals) as Pred,
   startsWith,
   endsWith,
   on: curry(compareDate('on')),

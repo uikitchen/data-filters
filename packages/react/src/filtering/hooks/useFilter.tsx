@@ -31,7 +31,7 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
     return columnDefinitions.reduce((a, c) => {
       a[c.id] = c?.filter ?? always(true);
       return a;
-    }, {} as Record<keyof T, typeof FilterOperations[keyof typeof FilterOperations]>)
+    }, {} as Record<keyof T, (input: any) => boolean>)
   });
   const [filterStage, setFilterStage] = useState({});
   const { options } = useSelectData(columns, data);
@@ -119,7 +119,7 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
     if (!column.length)
       return;
 
-    const filter: (value: any) => any = FilterOperations[values[0]];
+    const filter = FilterOperations[values[0]];
     const value = column[0].value ?? "";
 
     setColumns(columns.map(e => e.id === name ? ({...e, active: values[0]}): {...e}));

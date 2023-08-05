@@ -43,6 +43,13 @@ export const columnDefinitions: ColumnDef<IRow>[] = [
   },
   {
       locked: false,
+      id: 'city',
+      active: 'eq',
+      value: 'London',
+      type: 'Select',
+  },
+  {
+      locked: false,
       id: 'height',
       active: 'eqLoose',
       type: 'Number'

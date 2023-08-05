@@ -19,7 +19,8 @@ export const useSelectData = <T,>(columns: WithComponent<T>[], data: any[]) => {
     if (!selectColumns.length)
       return;
 
-    const base = fromPairs(map<any, any>(flip(pair)(new Set), selectColumns));
+    const createSetPair = (key: string) => [key, new Set()];
+    const base = fromPairs(map<any, any>(createSetPair, selectColumns));
 
     setOptions(
       data.reduce((a, c) => {
