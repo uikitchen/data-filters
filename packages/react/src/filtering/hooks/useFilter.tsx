@@ -29,7 +29,7 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
   const [pageSize, setPageSize] = useState(pageSizeInit ?? data.length);
   const [activeFilters, setActiveFilters] = useState(() => {
     return columnDefinitions.reduce((a, c) => {
-      a[c.id] = c?.filter ?? always(true);
+      a[c.id] = c?.value ? FilterOperations[c.active](c.value) : always(true);
       return a;
     }, {} as Record<keyof T, (input: any) => boolean>)
   });
@@ -89,7 +89,7 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
 
   const clearAll = () => {
     setActiveFilters(columnDefinitions.reduce((a, c) => {
-      a[c.id] = c?.locked ? c.filter : always(true);
+      a[c.id] = c?.locked ? FilterOperations[c.active](c.value) : always(true);
       return a;
     }, {} as any))
     setColumns(columns.map(e => ({...e, value: e.locked ? e.value : ""})))

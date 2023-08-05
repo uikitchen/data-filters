@@ -1,10 +1,8 @@
-import { flip, includes } from 'ramda'
 import { Filter, FilterComponents } from "../filtering/Filters"
 import { FilterOperations } from '../filtering/operations'
 import { IRow } from "./data"
 
 export type ColumnDef<T> = {
-  filter?: (pred: any) => boolean, 
   value?: any, 
   locked?: boolean, 
   id: keyof T, 
@@ -16,48 +14,41 @@ export type ColumnDef<T> = {
 
 export const columnDefinitions: ColumnDef<IRow>[] = [
   {
-      // filter: includes('joe'),
-      // value: 'joe',
-      id: 'name',
-      locked: false,
-      active: 'includes',
-      trigger: 'submit',
-      type: 'String'
+    id: 'name',
+    locked: false,
+    active: 'includes',
+    trigger: 'submit',
+    type: 'String'
   },
   {
-      locked: false,
-      id: 'born',
-      active: 'on',
-      type: 'Date'
+    locked: false,
+    id: 'born',
+    active: 'on',
+    type: 'Date'
   },
   {
-      locked: false,
-      id: 'car',
-      active: 'eqMultiCaseInsensitive',
-      value: ['BMW', 'Audi'],
-      filter: (val) => {
-        const lower = val.toLowerCase()
-        return flip(includes)(['bmw', 'audi'])(lower)
-      },
-      type: 'MultiSelect',
+    locked: true,
+    id: 'car',
+    active: 'eqMultiCaseInsensitive',
+    value: ['BMW', 'Audi'],
+    type: 'MultiSelect',
   },
   {
-      locked: false,
-      id: 'city',
-      active: 'eq',
-      value: 'London',
-      type: 'Select',
+    locked: false,
+    id: 'city',
+    active: 'eq',
+    type: 'Select',
   },
   {
-      locked: false,
-      id: 'height',
-      active: 'eqLoose',
-      type: 'Number'
+    locked: false,
+    id: 'height',
+    active: 'eqLoose',
+    type: 'Number'
   },
   {
-      locked: false,
-      id: 'online',
-      active: 'eq',
-      type: 'Switch'
-  },
+    locked: false,
+    id: 'online',
+    active: 'eq',
+    type: 'Switch'
+  }
 ]

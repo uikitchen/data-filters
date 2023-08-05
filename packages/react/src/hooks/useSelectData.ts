@@ -1,4 +1,4 @@
-import { flip, fromPairs, map, pair } from 'ramda'
+import { fromPairs, map } from 'ramda'
 import { useEffect, useState } from 'react'
 import { WithComponent } from '../filtering/hooks/useFilter'
 import { filterMap } from '../utils'
