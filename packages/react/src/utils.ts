@@ -1,6 +1,6 @@
 import { replace, curry } from 'ramda';
 
-export function filterMap<T, K>(filterFn: (p: T) => boolean, mapFn: (a: any) => K, data: T[]): K[] {
+export function filterMap<T, K>(filterFn: (p: T) => boolean, mapFn: (a: T) => K, data: T[]): K[] {
 	return data.reduce((a: any, c: T) => {
 		if (filterFn(c)) 
       a.push(mapFn(c));

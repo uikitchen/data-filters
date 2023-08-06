@@ -1,8 +1,8 @@
 import { FC } from 'react';
-import { ColumnDef } from '../data/columns';
 import { useFilter } from '../filtering/hooks/useFilter';
-import { IRow, useData } from '../data/data';
+import { IRow, useData } from './data/data';
 import { Row } from './Row';
+import { ColumnDef } from '../types';
 
 export const Table: FC<{columnDefinitions: ColumnDef<IRow>[]}> = ({columnDefinitions}) => {
 
@@ -26,7 +26,7 @@ export const Table: FC<{columnDefinitions: ColumnDef<IRow>[]}> = ({columnDefinit
       nextDisabled,
       prevDisabled
     }
-  } = useFilter(columnDefinitions, data, 10);
+  } = useFilter<IRow>(columnDefinitions, data, 10);
 
   return (
     <table>
@@ -41,8 +41,8 @@ export const Table: FC<{columnDefinitions: ColumnDef<IRow>[]}> = ({columnDefinit
                     onChange={
                       (value: any) =>
                         trigger !== 'onChange' && trigger
-                          ? stageFilter(id, value, active)
-                          : setFilter(id, value, active)
+                          ? stageFilter(id, value)
+                          : setFilter(id, value)
                     } 
                     locked={locked}
                     value={value}

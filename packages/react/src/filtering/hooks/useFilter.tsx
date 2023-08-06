@@ -1,9 +1,9 @@
-import { always, drop, filter, multiply, take, where } from 'ramda'
+import { allPass, always, drop, filter, multiply, path, take, values } from 'ramda'
 import { useMemo, useState } from 'react'
-import { ColumnDef } from '../../data/columns'
 import { useSelectData } from '../../hooks/useSelectData'
 import { FilterComponents, FilterTypes } from '../Filters'
-import { FilterOperations } from '../operations'
+import { FilterOperations, FilterOperationsType } from '../operations'
+import { ColumnDef, WithComponent } from '../../types'
 
 const TypeMapping: Record<FilterTypes, typeof FilterComponents[keyof typeof FilterComponents]> = {
   String: FilterComponents.String,
@@ -14,73 +14,49 @@ const TypeMapping: Record<FilterTypes, typeof FilterComponents[keyof typeof Filt
   Switch: FilterComponents.Switch
 }
 
-export type WithComponent<T> = ColumnDef<T> & {
-  components: Required<typeof FilterComponents[keyof typeof FilterComponents]>;
-};
-
-export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pageSizeInit?: number) => {
+export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: T[], pageSizeInit?: number) => {
   const [columns, setColumns] = useState<WithComponent<T>[]>(() => {
     return columnDefinitions.map(cd => ({
       ...cd, 
-      components: cd.components ? cd.components : TypeMapping[cd.type]
+      components: cd.components ? cd.components : TypeMapping[cd.type],
+      id: cd.path?.join("")
     })) as WithComponent<T>[]
   });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(pageSizeInit ?? data.length);
   const [activeFilters, setActiveFilters] = useState(() => {
-    return columnDefinitions.reduce((a, c) => {
-      a[c.id] = c?.value ? FilterOperations[c.active](c.value) : always(true);
+    return columns.reduce((a, c) => {
+      a[c.id as keyof T] = (val: string) => {
+        const getPath = path(c.path as string[], val)
+        return c?.value 
+          ? (FilterOperations as FilterOperationsType)[c.active](c.value)(getPath) 
+          : always(true);
+      }
       return a;
     }, {} as Record<keyof T, (input: any) => boolean>)
   });
   const [filterStage, setFilterStage] = useState({});
-  const { options } = useSelectData(columns, data);
+  const { options } = useSelectData<T>(columns, data);
 
   const resetPage = () => setPage(1);
 
-  const setFilter = async (name: keyof T, value: any, active: keyof typeof FilterOperations) => {
-    const res = _prepareFilters(name, value, active);
-    if (res) {
-      setActiveFilters((prevFilters) => ({
-        ...prevFilters,
-        //@ts-ignore
-        [name]: res.filter(value)
-      }));
-    }
+  const setFilter = async (id: string, value: any) => {
+    _filter(setActiveFilters, _prepareFilters, id, value);
   }
 
-  const stageFilter = (name: keyof T, value: any, active: keyof typeof FilterOperations) => {
-    const res = _prepareFilters(name, value, active);
-
-    if (res)    
-      setFilterStage(staged => ({
-        ...staged,
-        //@ts-ignore
-        [name]: res.filter(value)
-      }))
+  const stageFilter = (id: string, value: any) => {
+    _filter(setFilterStage, _prepareFilters, id, value);
   }
 
-  const stageMode = (name: keyof T, values: (keyof typeof FilterOperations)[]) => {
-    const res = _prepareModeFilters(name, values);
-
-    if (res)
-      setFilterStage(staged => ({
-        ...staged,
-        [name]: res.filter(res.value)
-      }))
+  const stageMode = (id: string, values: (keyof FilterOperationsType)[]) => {
+    _filter(setFilterStage, _prepareModeFilters, id, undefined, values[0]);
   }
 
-  const setMode = (name: keyof T, values: (keyof typeof FilterOperations)[]) => {
-    const res = _prepareModeFilters(name, values);
-
-    if (res)
-      setActiveFilters((prevFilters: any) => ({
-        ...prevFilters,
-        [name]: res.filter(res.value)
-      }))
+  const setMode = (id: string, values: (keyof FilterOperationsType)[]) => {
+    _filter(setActiveFilters, _prepareModeFilters, id, undefined, values[0]);
   }
 
-  const clearFilter = (name: keyof T) => {
+  const clearFilter = (name: string) => {
     _resetFilter(name);
 
     if (pageSizeInit)
@@ -88,8 +64,11 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
   }
 
   const clearAll = () => {
-    setActiveFilters(columnDefinitions.reduce((a, c) => {
-      a[c.id] = c?.locked ? FilterOperations[c.active](c.value) : always(true);
+    setActiveFilters(columns.reduce((a, c) => {
+      a[c.id] = (val: string) => {
+        const getPath = path(c.path as string[])
+        return c?.locked ? (FilterOperations as FilterOperationsType)[c.active](c.value)(getPath(val)) : always(true);
+      }
       return a;
     }, {} as any))
     setColumns(columns.map(e => ({...e, value: e.locked ? e.value : ""})))
@@ -106,38 +85,60 @@ export const useFilter = <T,>(columnDefinitions: ColumnDef<T>[], data: any[], pa
     setFilterStage({});
   }
 
-  const _resetFilter = (name: keyof T) => {
+  const _filter = (
+    stateSetter: (value: React.SetStateAction<any>) => void,
+    prepareFn: (name: keyof T, value: any, active: keyof FilterOperationsType) => any,
+    id: string,
+    input?: any,
+    active?: keyof FilterOperationsType
+  ) => {
+    const column = columns.filter(e => e.id === id)?.[0];
+
+    if (!column)
+      return;
+    
+    const activeFilter = active ?? column?.active;
+    const currentInput = input ?? column?.value;
+    const res = prepareFn(column.id as keyof T, currentInput, activeFilter);
+
+    if (res)    
+      stateSetter((state: any) => ({
+        ...state,
+        [column.id as keyof T]: (data: any) => res.filter(currentInput, path(column?.path as string[], data))
+      }))
+  }
+
+  const _resetFilter = (name: string) => {
     setActiveFilters((prevFilters: any) => ({
       ...prevFilters,
       [name]: always(true)
     }))
-    setColumns(columns.map(e => e.id === name ? ({...e, value: ""}): {...e}))
+    setColumns(columns.map(e => ({...e, value: e.id === name ? "" : e.value})))
   }
 
-  const _prepareModeFilters = (name: keyof T, values: (keyof typeof FilterOperations)[]) => {
+  const _prepareModeFilters = (name: keyof T, value: any, active: keyof FilterOperationsType) => {
     const column = columns.filter(e => e.id === name);
     if (!column.length)
       return;
 
-    const filter = FilterOperations[values[0]];
-    const value = column[0].value ?? "";
+    const filter = (FilterOperations as FilterOperationsType)[active];
 
-    setColumns(columns.map(e => e.id === name ? ({...e, active: values[0]}): {...e}));
+    setColumns(columns.map(e => e.id === name ? ({...e, active}): {...e}));
 
     return {filter, value}
   }
 
-  const _prepareFilters = (name: keyof T, value: any, active: keyof typeof FilterOperations) => {
+  const _prepareFilters = (name: keyof T, value: any, active: keyof FilterOperationsType) => {
     setColumns(columns.map(e => e.id === name ? ({...e, value}): {...e}))
 
     if (pageSizeInit)
       resetPage()
 
-    return {filter: FilterOperations[active]}
+    return {filter: (FilterOperations as FilterOperationsType)[active]}
   }
 
   const filtered = useMemo(() => {
-    const filtered = filter(where(activeFilters), data);
+    const filtered = filter(allPass(values(activeFilters)), data);
 
     return { 
       paged: take(pageSize, drop(multiply((page - 1), pageSize), filtered)),
