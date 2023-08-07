@@ -33,10 +33,10 @@ export const Table: FC<{columnDefinitions: ColumnDef<IRow>[]}> = ({columnDefinit
       <thead>
         <tr>
           {
-            columns.map(({id, locked, components: {Filter, Mode}, active, value, trigger}) => {
+            columns.map(({id, label, locked, components: {Filter, Mode}, active, value, trigger}) => {
               return (
                 <th key={id}>
-                  {id}
+                  {label}
                   <Filter 
                     onChange={
                       (value: any) =>

@@ -15,11 +15,12 @@ export type WithComponent<T> = ColumnDef<T> & {
 };
 
 export type ColumnDef<T> = {
-  value?: any, 
-  locked?: boolean, 
   path: DeepKeys<Partial<T>>,
   active: keyof FilterOperationsType, 
+  type: Filter["String"]["type"]
+  label?: string,
+  value?: any, 
+  locked?: boolean, 
   components?: typeof FilterComponents[keyof typeof FilterComponents],
   trigger?: 'blur' | 'submit' | 'onChange',
-  type: Filter["String"]["type"]
 }

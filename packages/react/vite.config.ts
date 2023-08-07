@@ -22,7 +22,9 @@ export default defineConfig({
   plugins: [
     react(), 
     dts({
-      exclude: "stories"
+      exclude: [
+        "**/*.stories.tsx",
+      ]
     })
   ]
 })

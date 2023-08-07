@@ -8,7 +8,7 @@ export function filterMap<T, K>(filterFn: (p: T) => boolean, mapFn: (a: T) => K,
 	}, []);
 }
 
-export const compareDate = curry((cond: 'on' | 'onOrBefore' | 'onOrAfter', a: string, b: Date | string) => {
+export const compareDate: ReturnType<typeof curry> = curry((cond: 'on' | 'onOrBefore' | 'onOrAfter', a: string, b: Date | string) => {
   const isDate = b instanceof Date;
   const dateOnRow = isDate ? b : new Date(/(?=.*T)(?=.*Z).*/g.test(b) ? b : replace(/-/g, ',', b));
   const dateFromSelector = new Date(a);
